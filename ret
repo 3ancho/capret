@@ -1,0 +1,18 @@
+#!/usr/bin/python3
+import sys
+import pickle
+from collections import Counter
+
+
+
+def main():
+    with open("/tmp/cap.data", "rb") as f:
+        data = pickle.load(f) 
+
+    target = sys.argv[1] 
+    print(data[target])
+
+
+
+if __name__ == "__main__":
+    main()
