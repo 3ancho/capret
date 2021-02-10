@@ -1,10 +1,10 @@
-#Install
+# Install
 * make sure you have python3 
 * make sure both files are executable
 * add this folder that contains both executables `cap` and `ret` to your PATH (export PATH=/path/to/cap/:$PATH)
 
 
-#Example
+# Example
 
 Send stdout to `cap`
 ```
