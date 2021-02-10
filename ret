@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import sys
 import pickle
+import subprocess 
 from collections import Counter
 
 
@@ -8,10 +9,8 @@ from collections import Counter
 def main():
     with open("/tmp/cap.data", "rb") as f:
         data = pickle.load(f) 
-
     target = sys.argv[1] 
-    print(data[target])
-
+    subprocess.run("pbcopy", universal_newlines=True, input=data[target])
 
 
 if __name__ == "__main__":
