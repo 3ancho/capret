@@ -1,8 +1,13 @@
-#!/usr/bin/python3
+#!/Users/ruoran/.pyenv/shims/python
 import re
+import sys
 import pickle
 import fileinput
 from collections import Counter
+
+from time import sleep
+import threading
+
 
 
 ch_left = ['a', 's', 'd', 'f', 'g', 'q', 'w', 'e', 'r', 't', 'z', 'x', 'c', 'v']
@@ -20,25 +25,51 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-def get_tuples():
+def get_tokens():
     tuples = []
     for cl in ch_left:
         for cr in ch_right:
             tuples.append(cl + cr)
     return tuples
 
-class TS:
-    ts = get_tuples()
-    index = 0
-    m = {}
+class TokenClass:
+    tokens = get_tokens()
+    index = 0  # current un-assigned token
+    token_to_text = {}
 
 def main():
-    tsc = TS()
+    tsc = TokenClass()
+
+    t_tty_reader = threading.Thread(target=tty_reader, args=(tsc,))
+    t_pipe_reader = threading.Thread(target=pipe_reader, args=(tsc,))
+    t_pipe_reader.start()
+    sleep(0.1) # to let the existing 'tail' lines finish printing
+    t_tty_reader.start()
+
+def pipe_reader(tsc):
     for line in fileinput.input():
         process(line, tsc)
-
     with open("/tmp/cap.data", "wb") as f:
-        pickle.dump(tsc.m, f) 
+        pickle.dump(tsc.token_to_text, f) 
+
+
+def tty_reader(tsc):
+    read_fd = open("/dev/tty", "r")
+    print(bcolors.OKBLUE + "type the token for the text to capture" + bcolors.ENDC)
+    selection = read_fd.readline().strip().rstrip('\n')
+
+
+    if selection not in tsc.token_to_text:
+        print(bcolors.FAIL + "wrong token provided" + bcolors.ENDC)
+        sys.exit(1)
+
+
+    selected = tsc.token_to_text[selection]
+    print(bcolors.OKGREEN + "selected: \n" + selected + bcolors.ENDC)
+
+    with open("/tmp/selected.data", "wb") as f:
+        pickle.dump(selected, f) 
+
 
 
 def process(line, tsc):
@@ -47,7 +78,7 @@ def process(line, tsc):
 
     chars = [c for c in line]
 
-    ts = tsc.ts
+    tokens = tsc.tokens
 
     char_map = {}
     for char, count in Counter(chars).most_common():
@@ -56,19 +87,19 @@ def process(line, tsc):
 
 
     for i, item in enumerate(line.split(' ')):
-        len_diff = len(item) - len(ts[tsc.index])
+        len_diff = len(item) - len(tokens[tsc.index])
 
         if len_diff > 0:
-            print(bcolors.WARNING + ts[tsc.index] + ' ' * len_diff + bcolors.ENDC, end=" ")
+            print(bcolors.WARNING + tokens[tsc.index] + ' ' * len_diff + bcolors.ENDC, end=" ")
         else:
-            print(bcolors.WARNING + ts[tsc.index] + bcolors.ENDC, end=" ")
+            print(bcolors.WARNING + tokens[tsc.index] + bcolors.ENDC, end=" ")
 
-        tsc.m[ts[tsc.index]] = item
+        tsc.token_to_text[tokens[tsc.index]] = item
         tsc.index += 1
 
     print()
     for i, item in enumerate(line.split(' ')):
-        len_diff = len(item) - len(ts[tsc.index])
+        len_diff = len(item) - len(tokens[tsc.index])
 
         if len_diff > 0:
             print(item, end=" ")
@@ -79,6 +110,7 @@ def process(line, tsc):
     print()
 
 
-
 if __name__ == "__main__":
     main()
+
+

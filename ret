@@ -7,10 +7,17 @@ from collections import Counter
 
 
 def main():
-    with open("/tmp/cap.data", "rb") as f:
-        data = pickle.load(f) 
-    target = sys.argv[1] 
-    subprocess.run("pbcopy", universal_newlines=True, input=data[target])
+    if len(sys.argv) < 2:
+        with open("/tmp/selected.data", "rb") as f:
+            selected = pickle.load(f) 
+    else:
+        target = sys.argv[1] 
+        with open("/tmp/cap.data", "rb") as f:
+            data = pickle.load(f) 
+            selected = data[target]
+    subprocess.run("pbcopy", universal_newlines=True, input=selected)
+
+    print(selected)
 
 
 if __name__ == "__main__":
