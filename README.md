@@ -20,19 +20,20 @@ favorre/notebook latest 1041c9c36b1d 12 months ago 3.54GB
 
 sn    sm  dh           dj dk     dl  dy
 mysql 5.7 cd3ed0dfff7e 16 months ago 437MB
+
+type the token for the text to capture
+ap
+selected:
+68e7be49c28c
 ```
 
 
-Retrive the registered value, the value will be copied to your clip board
-```
-ret sk
-```
-
+Retrive the registered value, the value is alredy in your clip board
 ```
 docker rmi # then paste (ctrl/cmd + v) 
 ```
 
 The above will become
 ```
-docker rmi favorre/notebook
+docker rmi 68e7be49c28c
 ```
